@@ -120,6 +120,7 @@ button { cursor: pointer; padding: 6px 10px; border-radius: 6px; border: 1px sol
   <button class="date-button fancy-btn fancy-blue" onclick="showSchedule('test3')">11/20（木）</button>
   <button class="date-button fancy-btn fancy-blue" onclick="showSchedule('test4')">11/21（金）</button>
  <button class="date-button fancy-btn fancy-blue" onclick="showSchedule('test5')">試験上の注意</button>
+<button class="date-button fancy-btn fancy-blue" onclick="showSchedule('test6')">諸連絡</button>
 </div>
 
 <div id="scheduleDisplay" class="schedule-display">
@@ -132,42 +133,9 @@ button { cursor: pointer; padding: 6px 10px; border-radius: 6px; border: 1px sol
   
 <!-- Webページ -->
 <div id="drawArea">
-  <iframe src="https://incict-design.github.io/hikariplay/" allowfullscreen style="width:100%;height:300px;border:none;border-radius:6px;"></iframe>
+  <iframe src="https://incict-design.github.io/spelling/" allowfullscreen style="width:100%;height:300px;border:none;border-radius:6px;"></iframe>
 </div>
 
-<!-- ギャラリー -->
-<section>
-  <h2>画廊SHION</h2>
-  <div id="gallery"></div>
-  <div class="upload-row">
-    <input id="fileInput" type="file" accept="image/*" style="display:none;">
-    <button id="selectBtn">ファイルを選択</button>
-    <button id="uploadBtn">アップロード</button>
-    <span id="status"></span>
-  </div>
-</section>
-
-<!-- アカウント -->
-<section class="auth">
-  <div class="auth-header">
-    <h3 style="margin:0;">アカウント</h3>
-    <div id="authStatus">未ログイン</div>
-    <button id="loginBtn">ログイン</button>
-    <button id="logoutBtn" style="display:none;">ログアウト</button>
-  </div>
-  <div class="auth-row">
-    <input id="email" type="email" placeholder="icj21/ich24....@s.icc.ac.jp">
-    <input id="password" type="password" placeholder="パスワード：情報教室">
-  </div>
-</section>
-
-<div id="overlay"><img id="overlayImg" src=""></div>
-
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 
 <script>
 // ===== おみくじ・スケジュール =====
@@ -176,8 +144,12 @@ const scheduleData = {
   'following': { date: '11/19（水）', content: '<div>1限：公共</div><div>2限：論理・表現Ⅱ</div><div>3限：４組のみ：地理探究</div>' },
   'test3': { date: '11/20（木）', content: '<div>1限：古典探究</div><div>2限：英語CⅡ</div>' },
   'test4': { date: '11/21（金）', content: '<div>1限：文：世・日 / 理：物・生</div><div>2限：数学</div>' },
- 'test5': { date: '試験上の注意', content: '<div>【試験場の注意】</div><div>①不正行為の厳禁</div><div>②下敷の使用禁止</div><div>③膝掛使用禁止</div><div>④机上に置くのは、シャープペンシル・鉛筆と消しゴムのみ（ペンケースは置かない）。</div><div>⑤机の中には物を入れて置かない（聖書・讃美歌等も入れて置かない）。</div><div>⑥試験開始5分前には着席し、監督の先生を静かに待つ。</div><div>⑦試験は落ち着いた態度で受験し、誤解を招くことのないようにする。</div><div>⑧机上の落書きは消しておくこと。</div><div>⑨携帯電話(スマートウォッチ等インターネット機能付き電子機器を含む)は机の上や中に置いたり、ポケットに入れたりせず、必ず電源を切ってバッグの中に入れておく。</div><div>⑩カバンはファスナーを閉めて椅子の下に置き、カバンの中が見えないようにする。</div><div>⑪複数科目が同一時間にある場合は、科目ごとに座席を移動する。</div>' }
+ 'test5': { date: '試験上の注意', content: '<div>【試験場の注意】</div><div>①不正行為の厳禁</div><div>②下敷の使用禁止</div><div>③膝掛使用禁止</div><div>④机上に置くのは、シャープペンシル・鉛筆と消しゴムのみ（ペンケースは置かない）。</div><div>⑤机の中には物を入れて置かない（聖書・讃美歌等も入れて置かない）。</div><div>⑥試験開始5分前には着席し、監督の先生を静かに待つ。</div><div>⑦試験は落ち着いた態度で受験し、誤解を招くことのないようにする。</div><div>⑧机上の落書きは消しておくこと。</div><div>⑨携帯電話(スマートウォッチ等インターネット機能付き電子機器を含む)は机の上や中に置いたり、ポケットに入れたりせず、必ず電源を切ってバッグの中に入れておく。</div><div>⑩カバンはファスナーを閉めて椅子の下に置き、カバンの中が見えないようにする。</div><div>⑪複数科目が同一時間にある場合は、科目ごとに座席を移動する。</div>' },
+
+ 'test6': { date: '諸連絡', content: '<div>趣味は勉強、特技はテスト</div>' }
+
 };
+
 
 const omikujiResults = [
   {name:'大狂',text:'隕石注意'},
@@ -216,108 +188,8 @@ function showSchedule(k){
   document.getElementById("scheduleDisplay").style.display="block";
 }
 
-// ===== Firebase 画像共有 =====
-const firebaseConfig = {
-  apiKey: "AIzaSyCzDqI2YaOLoU4muurvvxBs4fOOSkH8Yew",
-  authDomain: "image-share-89916.firebaseapp.com",
-  projectId: "image-share-89916",
-  storageBucket: "image-share-89916.firebasestorage.app",
-  messagingSenderId: "859639070035",
-  appId: "1:859639070035:web:aab7543659c3d1a877f5a6"
-};
-firebase.initializeApp(firebaseConfig);
-const auth=firebase.auth(), db=firebase.firestore(), storage=firebase.storage();
 
-const emailInput=document.getElementById("email"),
-passwordInput=document.getElementById("password"),
-loginBtn=document.getElementById("loginBtn"),
-logoutBtn=document.getElementById("logoutBtn"),
-authStatus=document.getElementById("authStatus"),
-fileInput=document.getElementById("fileInput"),
-uploadBtn=document.getElementById("uploadBtn"),
-status=document.getElementById("status"),
-gallery=document.getElementById("gallery"),
-overlay=document.getElementById("overlay"),
-overlayImg=document.getElementById("overlayImg"),
-selectBtn=document.getElementById("selectBtn");
 
-let selectedFile=null;
-
-// 認証状態変更
-auth.onAuthStateChanged(user=>{
-  if(user){
-    authStatus.textContent=`ログイン中: ${user.displayName||user.email}`;
-    loginBtn.style.display="none";
-    logoutBtn.style.display="inline-block";
-  }else{
-    authStatus.textContent="未ログイン";
-    loginBtn.style.display="inline-block";
-    logoutBtn.style.display="none";
-  }
-});
-
-// ログイン
-loginBtn.addEventListener("click",async()=>{
-  const email=emailInput.value.trim();
-  const pass=passwordInput.value;
-  if(!email||!pass){ alert("メールとパスワードを入力してください"); return;}
-  try{
-    const user = await auth.signInWithEmailAndPassword(email,pass);
-    if(!user.user.emailVerified){
-      alert("メール認証が完了していません");
-      await auth.signOut();
-      return;
-    }
-  }catch(e){ alert(e.message);}
-});
-
-// ログアウト
-logoutBtn.addEventListener("click",()=>auth.signOut());
-
-// ファイル選択
-selectBtn.addEventListener('click',()=>fileInput.click());
-fileInput.addEventListener('change',()=>{
-  selectedFile=fileInput.files[0]||null;
-  status.textContent=selectedFile?selectedFile.name:'';
-});
-
-// アップロード
-uploadBtn.addEventListener("click",async()=>{
-  const user=auth.currentUser;
-  if(!user||!user.emailVerified){status.textContent="ログインが必要です"; return;}
-  if(!selectedFile){status.textContent="画像を選択してください"; return;}
-  uploadBtn.disabled=true; status.textContent="アップロード中...";
-  try{
-    const ref=storage.ref(`test-images/${user.uid}`);
-    await ref.put(selectedFile);
-    const url=await ref.getDownloadURL();
-    await db.collection("test-images").doc(user.uid).set({
-      username:user.displayName||user.email,
-      url,
-      updatedAt:new Date()
-    });
-    status.textContent="アップロード完了！";
-    selectedFile=null; fileInput.value="";
-  }catch(e){ status.textContent="アップロード失敗"; }
-  finally{ uploadBtn.disabled=false; }
-});
-
-// ギャラリー表示
-db.collection("test-images").onSnapshot(snapshot=>{
-  gallery.innerHTML="";
-  snapshot.forEach(doc=>{
-    const data=doc.data();
-    const div=document.createElement("div"); div.className="card";
-    const img=document.createElement("img"); img.src=data.url;
-    div.appendChild(img);
-    const meta=document.createElement("div"); meta.className="meta";
-    meta.textContent=`${data.username}\n${new Date(data.updatedAt.seconds*1000).toLocaleString()}`;
-    div.appendChild(meta);
-    img.onclick=()=>{ overlayImg.src=data.url; overlay.style.display="flex"; }
-    gallery.appendChild(div);
-  });
-});
-overlay.onclick=()=>{ overlay.style.display="none"; overlayImg.src=""; };
 </script>
 </body>
 </html>
