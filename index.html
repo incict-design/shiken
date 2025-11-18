@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>クラス連絡</title>
+<style>
+body { font-family: system-ui, -apple-system, "メイリオ", sans-serif; padding: 20px; max-width: 900px; margin: 0 auto; background:#fafafa; }
+header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+#gallery {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: 200px;
+  gap: 10px;
+  justify-items: center;
+  margin-top: 10px;
+}
+@media (max-width: 480px) { #gallery { grid-template-columns: repeat(2, 1fr); } }
+.card {
+  width: 110px; height: 150px; border: 1px solid #ddd; border-radius: 8px;
+  padding: 4px; background: white; cursor: pointer; display: flex; flex-direction: column; align-items: center; position: relative;
+}
+.card img { width: 100%; height: 100px; object-fit: cover; border-radius: 6px; transition: transform 0.3s; }
+.card img:hover { transform: scale(1.05); }
+.meta { font-size: 12px; color: #555; margin-top: 4px; white-space: pre-line; text-align: center; }
+button { cursor: pointer; padding: 6px 10px; border-radius: 6px; border: 1px solid #bbb; background: #f7f7f7; }
+.upload-row { display: flex; gap: 6px; align-items: center; margin-top: 4px; }
+.upload-row button { height: 32px; }
+#status { font-size: 13px; color: #333; margin-left:8px; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+#overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000;
+}
+#overlay img { max-width: 90%; max-height: 90%; border-radius: 8px; cursor: pointer; }
+.auth { margin-top: 18px; padding: 12px; border: 1px solid #eee; border-radius: 8px; background: #fff; }
+.auth-header { display: flex; align-items: center; gap: 8px; }
+.auth-row { display: flex; gap: 10px; margin-top: 8px; }
+.auth-row input { padding: 6px 8px; border-radius: 6px; border: 1px solid #ddd; }
+
+/* ---- おみくじ結果、スケジュール ---- */
+.omikuji-result { 
+  margin-top:8px; padding:10px; background:#fff7e6;
+  border-radius:8px; border-left:4px solid #ff9500;
+  font-size:14px; text-align:center; display:none;
+}
+.schedule-display { 
+  margin-top:10px; padding:10px; background:#f0f0f0; 
+  border-left:4px solid #4facfe; border-radius:6px; display:none; 
+}
+.schedule-date { font-weight:600; color:#4facfe; margin-bottom:4px; }
+.schedule-content { font-size:14px; color:#333; }
+
+.date-buttons { margin-top:10px; display:flex; flex-wrap:wrap; gap:6px; }
+
+/* ================================
+   ✨ 華やかなボタンスタイル
+   ================================ */
+/* --- 華やかなボタンスタイル（色を少し濃く） --- */
+.fancy-btn {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  color: white;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+/* 日付ボタン（青 → 濃く） */
+.fancy-blue {
+  background: linear-gradient(135deg, #5ed4ff 0%, #3e7bff 100%);
+  box-shadow: 0 4px 10px rgba(62, 123, 255, 0.45);
+}
+
+.fancy-blue:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 14px rgba(62, 123, 255, 0.65);
+}
+
+.fancy-blue:active {
+  transform: scale(0.97);
+}
+
+/* おみくじボタン（黄金 → 濃く） */
+.fancy-gold {
+  background: linear-gradient(135deg, #f5c242 0%, #f48c3e 100%);
+  box-shadow: 0 4px 10px rgba(244, 140, 62, 0.45);
+}
+
+.fancy-gold:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 14px rgba(244, 140, 62, 0.65);
+}
+
+.fancy-gold:active {
+  transform: scale(0.97);
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>11月18日（火）</h1>
+  <div id="status" style="margin-left:auto"></div>
+</header>
+
+<!-- --- おみくじ --- -->
+<div class="date-buttons">
+  <button class="omikuji-button fancy-btn fancy-gold" onclick="drawOmikuji()">🎯 おみくじ 1日2回</button>
+</div>
+<div id="omikujiResult" class="omikuji-result"></div>
+
+<!-- --- スケジュール --- -->
+<div class="date-buttons">
+  <button class="date-button fancy-btn fancy-blue" onclick="showSchedule('tomorrow')">11/18（火）</button>
+  <button class="date-button fancy-btn fancy-blue" onclick="showSchedule('following')">11/19（水）</button>
+  <button class="date-button fancy-btn fancy-blue" onclick="showSchedule('test3')">11/20（木）</button>
+  <button class="date-button fancy-btn fancy-blue" onclick="showSchedule('test4')">11/21（金）</button>
+ <button class="date-button fancy-btn fancy-blue" onclick="showSchedule('test5')">試験上の注意</button>
+</div>
+
+<div id="scheduleDisplay" class="schedule-display">
+  <div id="scheduleDate" class="schedule-date"></div>
+  <div id="scheduleContent" class="schedule-content"></div>
+</div>
+
+
+<h1></h1>
+  
+<!-- Webページ -->
+<div id="drawArea">
+  <iframe src="https://incict-design.github.io/hikariplay/" allowfullscreen style="width:100%;height:300px;border:none;border-radius:6px;"></iframe>
+</div>
+
+<!-- ギャラリー -->
+<section>
+  <h2>画廊SHION</h2>
+  <div id="gallery"></div>
+  <div class="upload-row">
+    <input id="fileInput" type="file" accept="image/*" style="display:none;">
+    <button id="selectBtn">ファイルを選択</button>
+    <button id="uploadBtn">アップロード</button>
+    <span id="status"></span>
+  </div>
+</section>
+
+<!-- アカウント -->
+<section class="auth">
+  <div class="auth-header">
+    <h3 style="margin:0;">アカウント</h3>
+    <div id="authStatus">未ログイン</div>
+    <button id="loginBtn">ログイン</button>
+    <button id="logoutBtn" style="display:none;">ログアウト</button>
+  </div>
+  <div class="auth-row">
+    <input id="email" type="email" placeholder="icj21/ich24....@s.icc.ac.jp">
+    <input id="password" type="password" placeholder="パスワード：情報教室">
+  </div>
+</section>
+
+<div id="overlay"><img id="overlayImg" src=""></div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+
+<script>
+// ===== おみくじ・スケジュール =====
+const scheduleData = {
+  'tomorrow': { date: '11/18（火）', content: '<div>1限：論理国語</div><div>2限：文：生物基礎 / 理：化学</div>' },
+  'following': { date: '11/19（水）', content: '<div>1限：公共</div><div>2限：論理・表現Ⅱ</div><div>3限：４組のみ：地理探究</div>' },
+  'test3': { date: '11/20（木）', content: '<div>1限：古典探究</div><div>2限：英語CⅡ</div>' },
+  'test4': { date: '11/21（金）', content: '<div>1限：文：世・日 / 理：物・生</div><div>2限：数学</div>' },
+ 'test5': { date: '試験上の注意', content: '<div>【試験場の注意】</div><div>①不正行為の厳禁</div><div>②下敷の使用禁止</div><div>③膝掛使用禁止</div><div>④机上に置くのは、シャープペンシル・鉛筆と消しゴムのみ（ペンケースは置かない）。</div><div>⑤机の中には物を入れて置かない（聖書・讃美歌等も入れて置かない）。</div><div>⑥試験開始5分前には着席し、監督の先生を静かに待つ。</div><div>⑦試験は落ち着いた態度で受験し、誤解を招くことのないようにする。</div><div>⑧机上の落書きは消しておくこと。</div><div>⑨携帯電話(スマートウォッチ等インターネット機能付き電子機器を含む)は机の上や中に置いたり、ポケットに入れたりせず、必ず電源を切ってバッグの中に入れておく。</div><div>⑩カバンはファスナーを閉めて椅子の下に置き、カバンの中が見えないようにする。</div><div>⑪複数科目が同一時間にある場合は、科目ごとに座席を移動する。</div>' }
+};
+
+const omikujiResults = [
+  {name:'大狂',text:'隕石注意'},
+  {name:'凶',text:'水鉄砲で撃たれる'},
+  {name:'吉',text:'脳筋大爆発！'},
+  {name:'小吉',text:'脳みそ絶対零度'},
+  {name:'中吉',text:'常北ファームで愛のささやき'},
+  {name:'大吉',text:'萩谷と睨めっこ'}
+];
+
+function getTodayKey(){ const t=new Date(); return t.getFullYear()+"-"+(t.getMonth()+1)+"-"+t.getDate(); }
+function getDrawCount(){ const k=getTodayKey(); const d=JSON.parse(localStorage.getItem("omikujiCount"))||{}; return d[k]||0; }
+function incrementDrawCount(){ const k=getTodayKey(); const d=JSON.parse(localStorage.getItem("omikujiCount"))||{}; d[k]=(d[k]||0)+1; localStorage.setItem("omikujiCount",JSON.stringify(d)); }
+function getSecondResult(){ return JSON.parse(localStorage.getItem(getTodayKey()+"-secondResult")); }
+function setSecondResult(r){ localStorage.setItem(getTodayKey()+"-secondResult",JSON.stringify(r)); }
+
+function drawOmikuji(){
+  const count=getDrawCount();
+  const box=document.getElementById("omikujiResult");
+  box.style.display="block";
+  if(count===0||count===1){
+    const r=Math.floor(Math.random()*omikujiResults.length);
+    const res=omikujiResults[r];
+    if(count===1) setSecondResult(res);
+    incrementDrawCount();
+    box.innerHTML=`今日の運勢：<strong>${res.name}</strong><br>${res.text}`;
+  }else{
+    const saved=getSecondResult();
+    box.innerHTML=saved?`今日の運勢：<strong>${saved.name}</strong><br>${saved.text}`:"（2回目の結果がありません）";
+  }
+}
+
+function showSchedule(k){
+  document.getElementById("scheduleDate").textContent=scheduleData[k].date;
+  document.getElementById("scheduleContent").innerHTML=scheduleData[k].content;
+  document.getElementById("scheduleDisplay").style.display="block";
+}
+
+// ===== Firebase 画像共有 =====
+const firebaseConfig = {
+  apiKey: "AIzaSyCzDqI2YaOLoU4muurvvxBs4fOOSkH8Yew",
+  authDomain: "image-share-89916.firebaseapp.com",
+  projectId: "image-share-89916",
+  storageBucket: "image-share-89916.firebasestorage.app",
+  messagingSenderId: "859639070035",
+  appId: "1:859639070035:web:aab7543659c3d1a877f5a6"
+};
+firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth(), db=firebase.firestore(), storage=firebase.storage();
+
+const emailInput=document.getElementById("email"),
+passwordInput=document.getElementById("password"),
+loginBtn=document.getElementById("loginBtn"),
+logoutBtn=document.getElementById("logoutBtn"),
+authStatus=document.getElementById("authStatus"),
+fileInput=document.getElementById("fileInput"),
+uploadBtn=document.getElementById("uploadBtn"),
+status=document.getElementById("status"),
+gallery=document.getElementById("gallery"),
+overlay=document.getElementById("overlay"),
+overlayImg=document.getElementById("overlayImg"),
+selectBtn=document.getElementById("selectBtn");
+
+let selectedFile=null;
+
+// 認証状態変更
+auth.onAuthStateChanged(user=>{
+  if(user){
+    authStatus.textContent=`ログイン中: ${user.displayName||user.email}`;
+    loginBtn.style.display="none";
+    logoutBtn.style.display="inline-block";
+  }else{
+    authStatus.textContent="未ログイン";
+    loginBtn.style.display="inline-block";
+    logoutBtn.style.display="none";
+  }
+});
+
+// ログイン
+loginBtn.addEventListener("click",async()=>{
+  const email=emailInput.value.trim();
+  const pass=passwordInput.value;
+  if(!email||!pass){ alert("メールとパスワードを入力してください"); return;}
+  try{
+    const user = await auth.signInWithEmailAndPassword(email,pass);
+    if(!user.user.emailVerified){
+      alert("メール認証が完了していません");
+      await auth.signOut();
+      return;
+    }
+  }catch(e){ alert(e.message);}
+});
+
+// ログアウト
+logoutBtn.addEventListener("click",()=>auth.signOut());
+
+// ファイル選択
+selectBtn.addEventListener('click',()=>fileInput.click());
+fileInput.addEventListener('change',()=>{
+  selectedFile=fileInput.files[0]||null;
+  status.textContent=selectedFile?selectedFile.name:'';
+});
+
+// アップロード
+uploadBtn.addEventListener("click",async()=>{
+  const user=auth.currentUser;
+  if(!user||!user.emailVerified){status.textContent="ログインが必要です"; return;}
+  if(!selectedFile){status.textContent="画像を選択してください"; return;}
+  uploadBtn.disabled=true; status.textContent="アップロード中...";
+  try{
+    const ref=storage.ref(`test-images/${user.uid}`);
+    await ref.put(selectedFile);
+    const url=await ref.getDownloadURL();
+    await db.collection("test-images").doc(user.uid).set({
+      username:user.displayName||user.email,
+      url,
+      updatedAt:new Date()
+    });
+    status.textContent="アップロード完了！";
+    selectedFile=null; fileInput.value="";
+  }catch(e){ status.textContent="アップロード失敗"; }
+  finally{ uploadBtn.disabled=false; }
+});
+
+// ギャラリー表示
+db.collection("test-images").onSnapshot(snapshot=>{
+  gallery.innerHTML="";
+  snapshot.forEach(doc=>{
+    const data=doc.data();
+    const div=document.createElement("div"); div.className="card";
+    const img=document.createElement("img"); img.src=data.url;
+    div.appendChild(img);
+    const meta=document.createElement("div"); meta.className="meta";
+    meta.textContent=`${data.username}\n${new Date(data.updatedAt.seconds*1000).toLocaleString()}`;
+    div.appendChild(meta);
+    img.onclick=()=>{ overlayImg.src=data.url; overlay.style.display="flex"; }
+    gallery.appendChild(div);
+  });
+});
+overlay.onclick=()=>{ overlay.style.display="none"; overlayImg.src=""; };
+</script>
+</body>
+</html>
